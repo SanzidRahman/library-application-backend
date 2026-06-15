@@ -91,6 +91,31 @@ export const getBooks = async (req, res) => {
   }
 };
 
+// get Single books
+export const getBook = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const book = await Book.findById(id)
+      .populate("author", "name")       // only return author name
+      .populate("publisher", "name")    // only return publisher name
+      .populate("category", "name");    // only return category name
+
+    if (!book) {
+      return res.status(404).json({ success: false, message: "Book not found" });
+    }
+
+    res.json({ success: true, data: book });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+
+
+
+
 
 
 

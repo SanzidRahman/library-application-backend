@@ -1,9 +1,10 @@
 import express from "express";
-import { createBooks, getBooks } from "../controller/book.controller.js";
+import { createBooks, getBook, getBooks } from "../controller/book.controller.js";
 
 const router = express.Router();
 
 router.get("/", getBooks);
+router.get("/:id", getBook);
 router.post("/", createBooks);
 
 // router.get("/featured");
@@ -11,7 +12,6 @@ router.post("/", createBooks);
 
 // router.get("/slug/:slug");
 
-// router.get("/:id");
 
 
 // router.put("/:id");
