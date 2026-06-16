@@ -1,24 +1,43 @@
-import Book from "../models/bookSchema.js";
+import { UploadOnCloudinary } from '../config/cloudinaryConfig.js'
+import Book from "../models/bookSchema.js"
+import Media from "../models/mediaSchema.js"
 
-
+// Create Books
 export const createBooks = async (req, res) => {
   try {
-    const books = await Book.create(req.body)
+    let pictureId = null;
 
-    res.status(201).json({
+    if (req.file) {
+      const uploadedFile = await UploadOnCloudinary(req.file.path);
+
+      const media = await Media.create({
+        url: uploadedFile.url,
+        secureUrl: uploadedFile.secure_url,
+        resourceType: uploadedFile.resource_type,
+
+      });
+
+      pictureId = media._id;
+    }
+
+    const book = await Book.create({
+      ...req.body,
+      media: pictureId,
+    });
+
+    return res.status(201).json({
       success: true,
-      data: books,
+      data: book,
     });
   } catch (error) {
-    res.json({
-      status: 500,
+    return res.status(500).json({
       success: false,
-      data: "Failed to create books",
-      error: error.message
-    })
+      error: error.message,
+    });
   }
-}
+};
 
+// Get All Boooks
 export const getBooks = async (req, res) => {
   try {
     const books = await Book.aggregate([
@@ -32,6 +51,17 @@ export const getBooks = async (req, res) => {
         },
       },
       { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+
+      // Join Category
+      {
+        $lookup: {
+          from: "media", // collection name in MongoDB
+          localField: "media",
+          foreignField: "_id",
+          as: "media",
+        },
+      },
+      { $unwind: { path: "$media", preserveNullAndEmptyArrays: true } },
 
       // Join Author
       {
@@ -72,6 +102,12 @@ export const getBooks = async (req, res) => {
             _id: "$category._id",
             name: "$category.name",
           },
+          media: {
+            _id: "$media._id",
+            url: "$media.url",
+            secureUrl: "$media.secureUrl",
+
+          },
           author: {
             _id: "$author._id",
             name: "$author.name",
@@ -99,7 +135,8 @@ export const getBook = async (req, res) => {
     const book = await Book.findById(id)
       .populate("author", "name")       // only return author name
       .populate("publisher", "name")    // only return publisher name
-      .populate("category", "name");    // only return category name
+      .populate("category", "name")    // only return category name
+      .populate("media", "url , secureUrl");
 
     if (!book) {
       return res.status(404).json({ success: false, message: "Book not found" });

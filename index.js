@@ -6,13 +6,14 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 
 // internal Import
-import ConnectionDB from './lib/dbConfig.js'
+import ConnectionDB from './config/dbConfig.js'
 import categoryRoutes from "../backend/routes/category.routes.js"
 import authorRoutes from "./routes/author.routes.js";
 import publisherRoutes from "./routes/publisher.routes.js";
 import bookRoutes from "./routes/book.routes.js";
 import megamenu from "./routes/megamenu.routes.js";
 import searchBook from "./routes/searchBook.routes.js";
+import mediaRoutes from "./routes/media.routes.js";
 // import publicRoute from './routes/publicRoute.js'
 // import authRoute from './routes/authRoutes.js'
 // import cookieParser from "cookie-parser";
@@ -48,6 +49,7 @@ app.use("/api/publishers", publisherRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/mega-menu", megamenu);
 app.use("/api/search", searchBook);
+app.use("/api/media", mediaRoutes);
 // app.use("/api/auth", authRoute);
 // app.use("/", publicRoute);
 // app.use("/api/auth", authRoutes);

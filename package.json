@@ -15,11 +15,14 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
+    "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.6.3",
+    "multer": "^2.2.0",
+    "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.14"
   }
 }

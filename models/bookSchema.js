@@ -12,6 +12,11 @@ const bookSchema = new mongoose.Schema(
       ref: "Category",
     },
 
+    media: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Media",
+    },
+
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Author",
@@ -22,11 +27,7 @@ const bookSchema = new mongoose.Schema(
       ref: "Publisher",
     },
 
-
-
     publicationYear: Number,
-
-
 
     price: {
       type: Number,
@@ -45,8 +46,6 @@ const bookSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-
-
 
   },
   { timestamps: true }
