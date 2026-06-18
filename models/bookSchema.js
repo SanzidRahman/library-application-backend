@@ -5,11 +5,14 @@ const bookSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim: true,
+      index: true, // 🔥 important for search
     },
 
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "Book",
+      index: true,
     },
 
     media: {
@@ -20,37 +23,50 @@ const bookSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Author",
+      index: true,
     },
 
     publisher: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Publisher",
+      index: true,
     },
 
-    publicationYear: Number,
+    publicationYear: {
+      type: Number,
+      index: true,
+    },
 
     price: {
       type: Number,
       required: true,
+      index: true,
     },
 
-    discountPercentage: Number,
-    discountPrice: Number,
+    discountPercentage: {
+      type: Number,
+      default: 0,
+    },
+
+    discountPrice: {
+      type: Number,
+      index: true,
+    },
 
     stock: {
       type: Number,
       default: 0,
+      index: true,
     },
 
     sold: {
       type: Number,
       default: 0,
+      index: true,
     },
-
   },
   { timestamps: true }
 );
-
 
 const Book = mongoose.models.Book || mongoose.model("Book", bookSchema);
 export default Book
