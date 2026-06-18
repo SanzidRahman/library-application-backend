@@ -3,13 +3,11 @@ import { createCategory, getCategories } from "../controller/category.controller
 
 const router = express.Router();
 
-// router.get("/:id");
 
-router.get("/", getCategories);
 router.post("/", createCategory);
+router.get("/", getCategories);
 
-// router.put("/:id");
 
-// router.delete("/:id");
+
 
 export default router;

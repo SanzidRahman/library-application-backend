@@ -1,8 +1,9 @@
 import { UploadOnCloudinary } from '../config/cloudinaryConfig.js'
 import Book from "../models/bookSchema.js"
 import Media from "../models/mediaSchema.js"
+import Category from "../models/categorySchema.js"
 
-// Create Books
+// Create Books Controller
 export const createBooks = async (req, res) => {
   try {
     let pictureId = null;
@@ -37,7 +38,7 @@ export const createBooks = async (req, res) => {
   }
 };
 
-// Get All Boooks
+// Boooks Controller / features books
 export const getBooks = async (req, res) => {
   try {
     const books = await Book.aggregate([
@@ -101,6 +102,7 @@ export const getBooks = async (req, res) => {
           category: {
             _id: "$category._id",
             name: "$category.name",
+            slug: "$category.slug",
           },
           media: {
             _id: "$media._id",
@@ -111,23 +113,26 @@ export const getBooks = async (req, res) => {
           author: {
             _id: "$author._id",
             name: "$author.name",
+            slug: "$author.slug",
+
           },
           publisher: {
             _id: "$publisher._id",
             name: "$publisher.name",
+            slug: "$publisher.slug",
           },
         },
       },
     ]);
 
-    res.json({ success: true, data: books });
+    res.json({ success: true, data: books, message: "Gets Books Successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-// get Single books
+// Single book controller
 export const getBook = async (req, res) => {
   const { id } = req.params;
 
@@ -149,8 +154,7 @@ export const getBook = async (req, res) => {
   }
 };
 
-
-// Get AllBooks
+// Get AllBooks Controllers
 export const GetAllBooks = async (req, res) => {
   try {
     const {
@@ -289,175 +293,3 @@ export const GetAllBooks = async (req, res) => {
     });
   }
 };
-
-
-
-
-export const GetBooksAggregation = async (req, res) => {
-  try {
-    let {
-      page = 1,
-      limit = 8,
-      search = "",
-      category,
-      author,
-      publisher,
-      sort = "newest",
-      maxPrice,
-    } = req.query;
-
-    page = Math.max(Number(page), 1);
-    limit = Math.min(Math.max(Number(limit), 1), 50);
-    const skip = (page - 1) * limit;
-
-    // =========================
-    // 1. MATCH STAGE (FILTERS)
-    // =========================
-    const matchStage = {};
-
-    if (search.trim()) {
-      matchStage.title = {
-        $regex: search.trim(),
-        $options: "i",
-      };
-    }
-
-    if (category && mongoose.Types.ObjectId.isValid(category)) {
-      matchStage.category = new mongoose.Types.ObjectId(category);
-    }
-
-    if (author && mongoose.Types.ObjectId.isValid(author)) {
-      matchStage.author = new mongoose.Types.ObjectId(author);
-    }
-
-    if (publisher && mongoose.Types.ObjectId.isValid(publisher)) {
-      matchStage.publisher = new mongoose.Types.ObjectId(publisher);
-    }
-
-    if (maxPrice) {
-      matchStage.$expr = {
-        $lte: [
-          { $ifNull: ["$discountPrice", "$price"] },
-          Number(maxPrice),
-        ],
-      };
-    }
-
-    // =========================
-    // 2. SORT STAGE
-    // =========================
-    const sortMap = {
-      newest: { createdAt: -1 },
-      oldest: { createdAt: 1 },
-      "price-low": { price: 1 },
-      "price-high": { price: -1 },
-      "a-z": { title: 1 },
-      "z-a": { title: -1 },
-    };
-
-    const sortStage = sortMap[sort] || sortMap.newest;
-
-    // =========================
-    // 3. PIPELINE
-    // =========================
-    const pipeline = [
-      { $match: matchStage },
-
-      // populate replacements
-      {
-        $lookup: {
-          from: "categories",
-          localField: "category",
-          foreignField: "_id",
-          as: "category",
-        },
-      },
-      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
-
-      {
-        $lookup: {
-          from: "authors",
-          localField: "author",
-          foreignField: "_id",
-          as: "author",
-        },
-      },
-      { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
-
-      {
-        $lookup: {
-          from: "publishers",
-          localField: "publisher",
-          foreignField: "_id",
-          as: "publisher",
-        },
-      },
-      { $unwind: { path: "$publisher", preserveNullAndEmptyArrays: true } },
-
-      // sort
-      { $sort: sortStage },
-
-      // pagination
-      { $skip: skip },
-      { $limit: limit },
-
-      // optional cleanup
-      {
-        $project: {
-          title: 1,
-          price: 1,
-          discountPrice: 1,
-          stock: 1,
-          sold: 1,
-          createdAt: 1,
-          category: { _id: 1, name: 1 },
-          author: { _id: 1, name: 1 },
-          publisher: { _id: 1, name: 1 },
-        },
-      },
-    ];
-
-    // =========================
-    // 4. EXECUTE QUERY
-    // =========================
-    const [books, totalResult] = await Promise.all([
-      Book.aggregate(pipeline),
-
-      Book.aggregate([
-        { $match: matchStage },
-        { $count: "total" },
-      ]),
-    ]);
-
-    const total = totalResult[0]?.total || 0;
-
-    res.status(200).json({
-      success: true,
-      data: books,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
-        hasNext: page * limit < total,
-        hasPrev: page > 1,
-      },
-    });
-  } catch (error) {
-    console.error("AGG_BOOKS_ERROR:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-};
-
-
-
-
-
-
-
-
-

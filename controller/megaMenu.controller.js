@@ -2,7 +2,6 @@ import Book from "../models/bookSchema.js";
 
 export const getMegaMenu = async (req, res) => {
     try {
-        // ক্যাটাগরি অনুযায়ী গ্রুপ
         const categories = await Book.aggregate([
             {
                 $lookup: {
@@ -16,20 +15,13 @@ export const getMegaMenu = async (req, res) => {
             {
                 $group: {
                     _id: "$category._id",
-                    category: { $first: "$category.name" },
-                    books: {
-                        $push: {
-                            _id: "$_id",
-                            title: "$title",
-                            author: "$author",
-                            publisher: "$publisher",
-                        },
-                    },
+                    name: { $first: "$category.name" },
+                    count: { $sum: 1 },
                 },
             },
+            { $sort: { name: 1 } },
         ]);
 
-        // লেখক অনুযায়ী গ্রুপ
         const authors = await Book.aggregate([
             {
                 $lookup: {
@@ -43,20 +35,13 @@ export const getMegaMenu = async (req, res) => {
             {
                 $group: {
                     _id: "$author._id",
-                    author: { $first: "$author.name" },
-                    books: {
-                        $push: {
-                            _id: "$_id",
-                            title: "$title",
-                            category: "$category",
-                            publisher: "$publisher",
-                        },
-                    },
+                    name: { $first: "$author.name" },
+                    count: { $sum: 1 },
                 },
             },
+            { $sort: { name: 1 } },
         ]);
 
-        // প্রকাশক অনুযায়ী গ্রুপ
         const publishers = await Book.aggregate([
             {
                 $lookup: {
@@ -70,17 +55,11 @@ export const getMegaMenu = async (req, res) => {
             {
                 $group: {
                     _id: "$publisher._id",
-                    publisher: { $first: "$publisher.name" },
-                    books: {
-                        $push: {
-                            _id: "$_id",
-                            title: "$title",
-                            category: "$category",
-                            author: "$author",
-                        },
-                    },
+                    name: { $first: "$publisher.name" },
+                    count: { $sum: 1 },
                 },
             },
+            { $sort: { name: 1 } },
         ]);
 
         res.json({
