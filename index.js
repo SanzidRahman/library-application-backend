@@ -30,6 +30,7 @@ import { notFoundHandler, errorHandler } from './middleware/errorHandler.js'
 const app = express();
 app.use(express.json());
 await ConnectionDB();
+const PORT = process.env.PORT
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 
@@ -68,6 +69,6 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Port
-app.listen(process.env.PORT, () => {
-  console.log(`The app listening on port ${process.env.PORT}`);
+app.listen(PORT, () => {
+  console.log(`The app listening on port ${PORT}`);
 });
