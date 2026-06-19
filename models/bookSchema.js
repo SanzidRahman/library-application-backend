@@ -11,7 +11,7 @@ const bookSchema = new mongoose.Schema(
 
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Book",
+      ref: "Category",
       index: true,
     },
 

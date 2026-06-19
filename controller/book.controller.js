@@ -262,9 +262,9 @@ export const GetAllBooks = async (req, res) => {
       await Book.countDocuments(query);
 
     const books = await Book.find(query)
-      .populate("category", "name")
-      .populate("author", "name")
-      .populate("publisher", "name")
+      .populate("category", "name , slug")
+      .populate("author", "name , slug")
+      .populate("publisher", "name , slug")
       .populate(
         "media",
         "url secureUrl"
@@ -274,6 +274,7 @@ export const GetAllBooks = async (req, res) => {
       .limit(Number(limit))
       .lean();
 
+
     return res.status(200).json({
       success: true,
       currentPage: Number(page),
@@ -282,6 +283,7 @@ export const GetAllBooks = async (req, res) => {
         totalBooks / Number(limit)
       ),
       data: books,
+      message: "Books fetched successful"
     });
   } catch (error) {
     console.log(error);
