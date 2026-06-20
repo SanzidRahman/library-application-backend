@@ -29,7 +29,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors({
   origin: [
     process.env.CORS_ORIGIN,
-    process.env.VERCEL_ORIGIN
+    "https://library-application-frontend.vercel.app"
 
   ],
   credentials: true
