@@ -1,20 +1,28 @@
 // 404 Error handler
-export const notFoundHandler = async ( req , res , next ) => {
-        next("Requested Url not found ")
+export const notFoundHandler = async (req, res, next) => {
+    next("Requested Url not found ")
 }
 
 // Error handler
-export const errorHandler = async (err , req , res , next ) => {
-    if(err.message){
-        res.json({
-            message: err.message,
-            status: 500
-        })
-    }else{
-         res.json({
-            message: "There was an server Error",
-            status: 500
-        })
-    }
-}
+// export const errorHandler = async (err, req, res, next) => {
+//     if (err.message) {
+//         res.json({
+//             message: err.message,
+//             status: 500
+//         })
+//     } else {
+//         res.json({
+//             message: "There was an server Error",
+//             status: 500
+//         })
+//     }
+// }
 
+export const errorHandler = (err, req, res, next) => {
+    console.error(err);
+
+    res.status(err.status || 500).json({
+        message: err.message,
+        stack: process.env.NODE_ENV !== "production" ? err.stack : null,
+    });
+};
