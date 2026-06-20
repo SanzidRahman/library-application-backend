@@ -45,10 +45,20 @@ app.use("/api/media", mediaRoutes);
 app.use("/api/filters", filterRoutes);
 
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is running",
+  });
+});
+
 
 // error handler
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+
+
 
 // Port
 app.listen(PORT, () => {
